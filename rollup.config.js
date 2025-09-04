@@ -14,13 +14,21 @@ module.exports = [
         file: packageJson.main,
         format: 'cjs',
         sourcemap: true,
-        exports: 'named',
-        name: 'PageVisualizer'
+        exports: 'named'
       },
       {
         file: packageJson.module,
         format: 'esm',
         sourcemap: true
+      },
+      {
+        file: 'dist/index.umd.js',
+        format: 'umd',
+        name: 'PageVisualizer',
+        sourcemap: true,
+        globals: {
+          'zod': 'z'
+        }
       }
     ],
     plugins: [
@@ -33,7 +41,7 @@ module.exports = [
       }),
       terser.default()
     ],
-    external: []
+    external: ['zod']
   },
   {
     input: 'dist/index.d.ts',

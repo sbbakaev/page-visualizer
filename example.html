@@ -107,11 +107,14 @@
         </div>
     </div>
 
-    <script type="module">
-        // Note: In a real implementation, you would import from the built library
-        // import { PageVisualizer } from './dist/index.js';
+    <script src="https://unpkg.com/zod@3.22.4/lib/index.js"></script>
+    <script src="./dist/index.umd.js"></script>
+    <script>
+        // PageVisualizer is now available as a global variable
+        // Use the real PageVisualizer from the UMD bundle
+        const { PageVisualizer } = window.PageVisualizer || {};
         
-        // For this example, we'll simulate the PageVisualizer functionality
+        // Fallback mock implementation if UMD bundle fails to load
         class MockPageVisualizer {
             constructor(options) {
                 this.container = options.container;
@@ -277,10 +280,25 @@
         
         // Initialize the visualizer
         const container = document.getElementById('page-container');
-        let visualizer = new MockPageVisualizer({
-            container,
-            mode: 'canvas'
-        });
+        let visualizer;
+        
+        // Try to use the real PageVisualizer, fallback to mock
+        try {
+            if (PageVisualizer) {
+                visualizer = new PageVisualizer({
+                    container,
+                    mode: 'canvas'
+                });
+            } else {
+                throw new Error('PageVisualizer not available');
+            }
+        } catch (error) {
+            console.warn('Using mock PageVisualizer:', error.message);
+            visualizer = new MockPageVisualizer({
+                container,
+                mode: 'canvas'
+            });
+        }
         
         // Page definitions
         const textPage = {
@@ -396,18 +414,44 @@
         };
         
         window.switchToCanvas = () => {
-            visualizer.mode = 'canvas';
-            visualizer.init();
-            if (visualizer.currentPage) {
-                visualizer.renderPage(visualizer.currentPage);
+            if (visualizer instanceof MockPageVisualizer) {
+                visualizer.mode = 'canvas';
+                visualizer.init();
+                if (visualizer.currentPage) {
+                    visualizer.renderPage(visualizer.currentPage);
+                }
+            } else {
+                // For real PageVisualizer, we need to recreate it with new mode
+                const currentPage = visualizer.getCurrentPage();
+                visualizer.destroy();
+                visualizer = new PageVisualizer({
+                    container,
+                    mode: 'canvas'
+                });
+                if (currentPage) {
+                    visualizer.renderPage(currentPage);
+                }
             }
         };
         
         window.switchToSVG = () => {
-            visualizer.mode = 'svg';
-            visualizer.init();
-            if (visualizer.currentPage) {
-                visualizer.renderPage(visualizer.currentPage);
+            if (visualizer instanceof MockPageVisualizer) {
+                visualizer.mode = 'svg';
+                visualizer.init();
+                if (visualizer.currentPage) {
+                    visualizer.renderPage(visualizer.currentPage);
+                }
+            } else {
+                // For real PageVisualizer, we need to recreate it with new mode
+                const currentPage = visualizer.getCurrentPage();
+                visualizer.destroy();
+                visualizer = new PageVisualizer({
+                    container,
+                    mode: 'svg'
+                });
+                if (currentPage) {
+                    visualizer.renderPage(currentPage);
+                }
             }
         };
         
