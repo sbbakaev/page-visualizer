@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PageVisualizer Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background-color: #0056b3;
+        }
+        
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .page-container {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background-color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .info {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .code-block {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PageVisualizer Example</h1>
+        
+        <div class="info">
+            <h3>Interactive Demo</h3>
+            <p>This example demonstrates the PageVisualizer library with different page types and rendering modes.</p>
+        </div>
+        
+        <div class="controls">
+            <button onclick="renderTextPage()">Text Page</button>
+            <button onclick="renderImagePage()">Image Page</button>
+            <button onclick="renderMixedPage()">Mixed Content</button>
+            <button onclick="renderAnimatedPage()">Animated Page</button>
+            <button onclick="switchToCanvas()">Canvas Mode</button>
+            <button onclick="switchToSVG()">SVG Mode</button>
+            <button onclick="exportPage()">Export PNG</button>
+            <button onclick="clearPage()">Clear</button>
+        </div>
+        
+        <div id="page-container" class="page-container" style="width: 800px; height: 600px; margin: 0 auto;"></div>
+        
+        <div class="info">
+            <h3>Code Example</h3>
+            <div class="code-block" id="code-example">
+                // Click a button above to see the code for that page type
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Note: In a real implementation, you would import from the built library
+        // import { PageVisualizer } from './dist/index.js';
+        
+        // For this example, we'll simulate the PageVisualizer functionality
+        class MockPageVisualizer {
+            constructor(options) {
+                this.container = options.container;
+                this.mode = options.mode || 'canvas';
+                this.currentPage = null;
+                this.init();
+            }
+            
+            init() {
+                this.container.innerHTML = '';
+                if (this.mode === 'canvas') {
+                    this.canvas = document.createElement('canvas');
+                    this.canvas.width = 800;
+                    this.canvas.height = 600;
+                    this.canvas.style.width = '100%';
+                    this.canvas.style.height = '100%';
+                    this.ctx = this.canvas.getContext('2d');
+                    this.container.appendChild(this.canvas);
+                } else if (this.mode === 'svg') {
+                    this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    this.svg.setAttribute('width', '800');
+                    this.svg.setAttribute('height', '600');
+                    this.svg.style.width = '100%';
+                    this.svg.style.height = '100%';
+                    this.container.appendChild(this.svg);
+                }
+            }
+            
+            async renderPage(page) {
+                this.currentPage = page;
+                this.clear();
+                
+                if (this.mode === 'canvas') {
+                    this.renderCanvasPage(page);
+                } else if (this.mode === 'svg') {
+                    this.renderSVGPage(page);
+                }
+            }
+            
+            renderCanvasPage(page) {
+                const ctx = this.ctx;
+                
+                // Background
+                if (page.background) {
+                    if (page.background.color) {
+                        ctx.fillStyle = page.background.color;
+                        ctx.fillRect(0, 0, 800, 600);
+                    }
+                    if (page.background.gradient) {
+                        const gradient = ctx.createLinearGradient(0, 0, 800, 600);
+                        gradient.addColorStop(0, '#667eea');
+                        gradient.addColorStop(1, '#764ba2');
+                        ctx.fillStyle = gradient;
+                        ctx.fillRect(0, 0, 800, 600);
+                    }
+                }
+                
+                // Text blocks
+                if (page.textBlocks) {
+                    page.textBlocks.forEach(block => {
+                        ctx.fillStyle = block.formatting.color;
+                        ctx.font = `${block.formatting.fontSize}px ${block.formatting.fontFamily}`;
+                        ctx.textAlign = block.position.alignment || 'left';
+                        
+                        const x = block.position.alignment === 'center' ? 400 : block.position.x;
+                        ctx.fillText(block.content, x, block.position.y + 20);
+                    });
+                }
+                
+                // Images
+                if (page.images) {
+                    page.images.forEach(image => {
+                        // Draw placeholder for image
+                        ctx.fillStyle = '#e9ecef';
+                        ctx.fillRect(image.position.x, image.position.y, image.position.width, image.position.height);
+                        ctx.fillStyle = '#6c757d';
+                        ctx.font = '14px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('Image Placeholder', 
+                            image.position.x + image.position.width / 2, 
+                            image.position.y + image.position.height / 2);
+                    });
+                }
+            }
+            
+            renderSVGPage(page) {
+                this.svg.innerHTML = '';
+                
+                // Background
+                if (page.background) {
+                    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    rect.setAttribute('width', '800');
+                    rect.setAttribute('height', '600');
+                    rect.setAttribute('fill', page.background.color || '#ffffff');
+                    this.svg.appendChild(rect);
+                }
+                
+                // Text blocks
+                if (page.textBlocks) {
+                    page.textBlocks.forEach(block => {
+                        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                        text.setAttribute('x', block.position.x.toString());
+                        text.setAttribute('y', (block.position.y + 20).toString());
+                        text.setAttribute('fill', block.formatting.color);
+                        text.setAttribute('font-family', block.formatting.fontFamily);
+                        text.setAttribute('font-size', block.formatting.fontSize.toString());
+                        text.textContent = block.content;
+                        this.svg.appendChild(text);
+                    });
+                }
+                
+                // Images
+                if (page.images) {
+                    page.images.forEach(image => {
+                        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                        rect.setAttribute('x', image.position.x.toString());
+                        rect.setAttribute('y', image.position.y.toString());
+                        rect.setAttribute('width', image.position.width.toString());
+                        rect.setAttribute('height', image.position.height.toString());
+                        rect.setAttribute('fill', '#e9ecef');
+                        rect.setAttribute('stroke', '#6c757d');
+                        rect.setAttribute('stroke-width', '1');
+                        this.svg.appendChild(rect);
+                        
+                        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                        text.setAttribute('x', (image.position.x + image.position.width / 2).toString());
+                        text.setAttribute('y', (image.position.y + image.position.height / 2).toString());
+                        text.setAttribute('text-anchor', 'middle');
+                        text.setAttribute('fill', '#6c757d');
+                        text.setAttribute('font-family', 'Arial');
+                        text.setAttribute('font-size', '14');
+                        text.textContent = 'Image Placeholder';
+                        this.svg.appendChild(text);
+                    });
+                }
+            }
+            
+            clear() {
+                if (this.mode === 'canvas') {
+                    this.ctx.clearRect(0, 0, 800, 600);
+                } else if (this.mode === 'svg') {
+                    this.svg.innerHTML = '';
+                }
+            }
+            
+            exportPage() {
+                if (this.mode === 'canvas') {
+                    const dataURL = this.canvas.toDataURL('image/png');
+                    const link = document.createElement('a');
+                    link.download = 'page-export.png';
+                    link.href = dataURL;
+                    link.click();
+                } else if (this.mode === 'svg') {
+                    const svgData = new XMLSerializer().serializeToString(this.svg);
+                    const dataURL = 'data:image/svg+xml;base64,' + btoa(svgData);
+                    const link = document.createElement('a');
+                    link.download = 'page-export.svg';
+                    link.href = dataURL;
+                    link.click();
+                }
+            }
+        }
+        
+        // Initialize the visualizer
+        const container = document.getElementById('page-container');
+        let visualizer = new MockPageVisualizer({
+            container,
+            mode: 'canvas'
+        });
+        
+        // Page definitions
+        const textPage = {
+            id: 'text-page',
+            background: { color: '#f8f9fa' },
+            textBlocks: [
+                {
+                    content: 'Welcome to PageVisualizer!',
+                    position: { x: 50, y: 100, width: 700, height: 50, alignment: 'center' },
+                    formatting: { fontSize: 32, fontFamily: 'Arial', color: '#333333', fontWeight: 'bold' }
+                },
+                {
+                    content: 'This is a sample text page demonstrating the library\'s text rendering capabilities. You can see how text is positioned, formatted, and aligned within the page.',
+                    position: { x: 50, y: 200, width: 700, height: 300, alignment: 'justify' },
+                    formatting: { fontSize: 16, fontFamily: 'Georgia', color: '#2c3e50', lineHeight: 1.6 }
+                }
+            ]
+        };
+        
+        const imagePage = {
+            id: 'image-page',
+            background: { gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
+            images: [
+                {
+                    src: 'image1.jpg',
+                    position: { x: 50, y: 50, width: 300, height: 200 },
+                    altText: 'Sample image 1'
+                },
+                {
+                    src: 'image2.jpg',
+                    position: { x: 450, y: 50, width: 300, height: 200 },
+                    altText: 'Sample image 2'
+                },
+                {
+                    src: 'image3.jpg',
+                    position: { x: 250, y: 300, width: 300, height: 200 },
+                    altText: 'Sample image 3'
+                }
+            ]
+        };
+        
+        const mixedPage = {
+            id: 'mixed-page',
+            background: { color: '#ffffff' },
+            textBlocks: [
+                {
+                    content: 'Mixed Content Page',
+                    position: { x: 50, y: 50, width: 700, height: 50, alignment: 'center' },
+                    formatting: { fontSize: 28, fontFamily: 'Arial', color: '#2c3e50', fontWeight: 'bold' }
+                }
+            ],
+            images: [
+                {
+                    src: 'image.jpg',
+                    position: { x: 100, y: 150, width: 200, height: 150 },
+                    altText: 'Sample image'
+                }
+            ],
+            textBlocks: [
+                {
+                    content: 'Mixed Content Page',
+                    position: { x: 50, y: 50, width: 700, height: 50, alignment: 'center' },
+                    formatting: { fontSize: 28, fontFamily: 'Arial', color: '#2c3e50', fontWeight: 'bold' }
+                },
+                {
+                    content: 'This page combines text and images to create a rich, engaging layout. The PageVisualizer library handles both content types seamlessly.',
+                    position: { x: 350, y: 150, width: 400, height: 200, alignment: 'left' },
+                    formatting: { fontSize: 16, fontFamily: 'Georgia', color: '#34495e', lineHeight: 1.5 }
+                }
+            ]
+        };
+        
+        const animatedPage = {
+            id: 'animated-page',
+            background: { gradient: 'linear-gradient(45deg, #ff6b6b, #4ecdc4)' },
+            textBlocks: [
+                {
+                    id: 'animated-title',
+                    content: 'Animated Page',
+                    position: { x: 50, y: 200, width: 700, height: 50, alignment: 'center' },
+                    formatting: { fontSize: 36, fontFamily: 'Arial', color: '#ffffff', fontWeight: 'bold' }
+                },
+                {
+                    content: 'This page demonstrates animation capabilities. Elements can fade in, slide, or rotate with customizable timing.',
+                    position: { x: 50, y: 300, width: 700, height: 100, alignment: 'center' },
+                    formatting: { fontSize: 18, fontFamily: 'Arial', color: '#ffffff' }
+                }
+            ],
+            animations: [
+                { target: 'animated-title', type: 'fadeIn', duration: 1000, delay: 500 }
+            ]
+        };
+        
+        // Global functions for buttons
+        window.renderTextPage = () => {
+            visualizer.renderPage(textPage);
+            updateCodeExample('textPage', textPage);
+        };
+        
+        window.renderImagePage = () => {
+            visualizer.renderPage(imagePage);
+            updateCodeExample('imagePage', imagePage);
+        };
+        
+        window.renderMixedPage = () => {
+            visualizer.renderPage(mixedPage);
+            updateCodeExample('mixedPage', mixedPage);
+        };
+        
+        window.renderAnimatedPage = () => {
+            visualizer.renderPage(animatedPage);
+            updateCodeExample('animatedPage', animatedPage);
+        };
+        
+        window.switchToCanvas = () => {
+            visualizer.mode = 'canvas';
+            visualizer.init();
+            if (visualizer.currentPage) {
+                visualizer.renderPage(visualizer.currentPage);
+            }
+        };
+        
+        window.switchToSVG = () => {
+            visualizer.mode = 'svg';
+            visualizer.init();
+            if (visualizer.currentPage) {
+                visualizer.renderPage(visualizer.currentPage);
+            }
+        };
+        
+        window.exportPage = () => {
+            visualizer.exportPage();
+        };
+        
+        window.clearPage = () => {
+            visualizer.clear();
+            document.getElementById('code-example').textContent = '// Page cleared';
+        };
+        
+        function updateCodeExample(pageName, pageData) {
+            const codeExample = document.getElementById('code-example');
+            codeExample.textContent = `const ${pageName} = ${JSON.stringify(pageData, null, 2)};\n\nawait visualizer.renderPage(${pageName});`;
+        }
+        
+        // Render initial page
+        renderTextPage();
+    </script>
+</body>
+</html>
