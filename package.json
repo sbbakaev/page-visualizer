@@ -54,10 +54,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sbbakaiev/page-visualizer.git"
+    "url": "git+https://github.com/sbbakaev/page-visualizer.git"
   },
   "bugs": {
-    "url": "https://github.com/sbbakaiev/page-visualizer/issues"
+    "url": "https://github.com/sbbakaev/page-visualizer/issues"
   },
-  "homepage": "https://github.com/sbbakaiev/page-visualizer#readme"
+  "homepage": "https://github.com/sbbakaev/page-visualizer#readme"
 }
