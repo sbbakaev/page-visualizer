@@ -14,6 +14,7 @@ module.exports = [
         file: packageJson.main,
         format: 'cjs',
         sourcemap: true,
+        exports: 'named',
         name: 'PageVisualizer'
       },
       {
