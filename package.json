@@ -1,6 +1,6 @@
 {
   "name": "page-visualizer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "TypeScript library for rendering and visualizing pages of digital books, comics, manga, or interactive content",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
